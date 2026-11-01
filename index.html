@@ -156,49 +156,81 @@ footer{padding:10px 20px 70px;text-align:center;font-size:1.5rem}
  </section>
 <footer class="sc">Amber &amp; Jack · 2027.03.13</footer>
 <script>
-const GOOGLE_FORM_URL="https://docs.google.com/forms/d/e/1FAIpQLScAXw2H41NKQ4K-B8hcJdiWXqyckMMl0mjU5tETV6Y8CVTkYQ/viewform"; // ← 貼上 Google 表單連結，這裡填了就會改用表單
-const LINE_URL="https://line.me/ti/p/你的LINE_ID"; // ← 換成新人的 LINE 好友連結
+<script>
+const GOOGLE_FORM_URL="https://docs.google.com/forms/d/e/1FAIpQLScAXw2H41NKQ4K-B8hcJdiWXqyckMMl0mjU5tETV6Y8CVTkYQ/viewform"; 
+
 document.querySelectorAll('[data-ph]').forEach(el=>el.addEventListener('click',()=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>{const f=i.files[0];if(!f)return;el.innerHTML='<img alt="">';el.firstChild.src=URL.createObjectURL(f)};i.click()}));
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('on');io.unobserve(x.target)}}),{threshold:.12});
 document.querySelectorAll('.rv').forEach(e=>io.observe(e));
 let opened=false;
 function openInv(){if(opened)return;opened=true;document.getElementById('intro').classList.add('open');document.getElementById('mus').classList.add('show');startMusic();setInterval(petal,1100)}
 function petal(){const p=document.createElement('div');p.className='petal';p.style.left=Math.random()*100+'vw';p.style.setProperty('--dx',(Math.random()*120-60)+'px');p.style.animationDuration=(7+Math.random()*6)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),14000)}
-/* RSVP */
-// ↓ Google 表單每題的代碼（取得預先填入的連結後填入，例如 "entry.123456789"）
-const ENTRIES={name:"entry.311798423",att:"entry.958933812",count:"entry.1628641506",kids:"entry.1883633959",diet:"entry.839522",card:"entry.1086763401",msg:"entry.1550498129"};
-const FORM_BASE="https://docs.google.com/forms/d/e/1FAIpQLScAXw2H41NKQ4K-B8hcJdiWXqyckMMl0mjU5tETV6Y8CVTkYQ/";
-const $=id=>document.getElementById(id);const V={};
+
+/* 1. 更新為正確的 Google 表單題庫 ID */
+const ENTRIES={
+    name:"entry.311798423",
+    att:"entry.958933812",
+    count:"entry.1628641506",
+    kids:"entry.1217762791", /* 兒童座椅的新 ID */
+    diet:"entry.839522",
+    card:"entry.1086763401",
+    msg:"entry.1550498129"
+};
+
+const $=id=>document.getElementById(id);
+const V={};
 document.querySelectorAll('.opts').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{
   const on=b.classList.contains('on');g.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
   if(on){V[g.dataset.k]=''}else{b.classList.add('on');V[g.dataset.k]=b.textContent}}));
+
+/* 2. 表單背景自動送出邏輯 */
 $('go').onclick=()=>{
   const d={name:$('n').value.trim(),att:V.att||'',count:$('c').value.trim(),kids:$('k').value.trim(),diet:V.diet||'',card:V.card||'',msg:$('m').value.trim()};
+  
+  // 檢查必填欄位
   if(!d.name){$('err').textContent='請填寫姓名';return}
   if(!d.count){$('err').textContent='請填寫出席人數';return}
   if(!d.diet){$('err').textContent='請選擇飲食喜好';return}
   if(!d.card){$('err').textContent='請選擇是否需要寄送喜帖';return}
   $('err').textContent='';
-  const t='【婚禮出席回覆】張永琛 & 李盈慧 2027/03/13\n姓名：'+d.name+'\n是否出席：'+(d.att||'（未選）')+'\n出席人數：'+d.count+'\n兒童座椅：'+(d.kids||'0')+'\n飲食喜好：'+d.diet+'\n喜帖：'+d.card+(d.msg?'\n祝福：'+d.msg:'');
-  $('txt').textContent=t;
-  const ready=Object.values(ENTRIES).every(x=>x);
-  if(ready){const q=new URLSearchParams();Object.keys(ENTRIES).forEach(k=>{const v=k==='kids'?(d.kids||'0'):d[k];if(v)q.set(ENTRIES[k],v)});
-    const q2=new URLSearchParams(q);q2.set('usp','pp_url');
-    $('gopen').href=FORM_BASE+'viewform?'+q2.toString();$('gopen').textContent='前往表單完成回覆';$('gfill').style.display='none';
-    $('resmsg').textContent='您的答案已經帶入表單，請在表單頁依畫面按「下一頁」並完成「提交」，回覆才算完成';
-    $('lineSend').style.display='none';$('copy').style.display='none';
-  }else{$('gopen').href=GOOGLE_FORM_URL;$('gopen').textContent='開啟 Google 表單填寫';
-    $('resmsg').textContent='最後一步：請把下面的內容傳給新人，或到 Google 表單填寫，我們才會收到';
-    $('lineSend').href='https://line.me/R/msg/text/?'+encodeURIComponent(t);
-    if(!/你的/.test(LINE_URL)){$('addf').href=LINE_URL;$('addf').style.display='inline-block'}}
-  $('res').style.display='block';$('res').scrollIntoView({behavior:'smooth',block:'center'});
+  
+  // 避免重複點擊，按鈕改為傳送中
+  const btn = $('go');
+  btn.textContent = '傳送中...';
+  btn.style.opacity = '0.7';
+  btn.style.pointerEvents = 'none';
+
+  // 將填寫資料綁定到 Google 表單對應欄位
+  const q = new URLSearchParams();
+  Object.keys(ENTRIES).forEach(k => {
+    const v = k === 'kids' ? (d.kids || '0') : d[k];
+    if (v) q.set(ENTRIES[k], v);
+  });
+
+  // 使用 fetch 發送 POST 請求直接將資料塞給 Google
+  fetch(GOOGLE_FORM_URL.replace('viewform', 'formResponse'), {
+    method: 'POST',
+    mode: 'no-cors', // 忽略跨域問題強制送出
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: q.toString()
+  }).then(() => {
+    // 送出成功後，將整個填寫區塊替換為感謝畫面
+    $('localForm').innerHTML = '<div style="text-align:center; padding: 40px 20px; animation: rv 1s forwards;"><h3 style="color:var(--acc); font-size:1.4rem; margin-bottom:12px;">回覆已成功送出！</h3><p style="color:var(--soft);">非常感謝您的回覆，<br>期待在婚禮當天與您相見！</p></div>';
+  }).catch((err) => {
+    $('err').textContent = '網路連線異常，請稍後再試。';
+    btn.textContent = '送出回覆';
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  });
 };
-$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('txt').textContent);$('copy').textContent='已複製 ✓'}catch(e){$('copy').textContent='請長按文字複製'}};
-/* 音樂設定：直接播放 music.mp3 */
+
+/* 音樂設定 */
 const au = new Audio('./music.mp3');
 au.loop=true;au.volume=.8;au.preload='auto';let playing=false;
 function mark(on){playing=on;const m=document.getElementById('mus');m.classList.toggle('on',on);m.style.opacity=on?.92:.5}
 function startMusic(){const r=au.play();if(r&&r.then)r.then(()=>mark(true)).catch(()=>mark(false));else mark(true)}
 function toggleMusic(){if(playing){au.pause();mark(false)}else{startMusic()}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)au.pause();else if(!document.hidden&&playing)au.play().catch(()=>{})});
-</script></body></html>
+</script>
