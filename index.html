@@ -128,36 +128,27 @@ footer{padding:10px 20px 70px;text-align:center;font-size:1.5rem}
  <div class="sc rv" style="font-size:1.8rem">R.S.V.P.</div>
  <h2 class="rv">出席回覆</h2><i class="rv"></i>
  <div id="gform" class="rv" style="display:none"><p style="margin-bottom:22px">為了替您安排席次<br>請點下方按鈕填寫出席回覆<br>期待與您相見</p><a class="btn" id="gbtn" href="#" target="_blank" rel="noopener">填寫出席回覆</a></div>
- <div id="localForm">
+<div id="localForm">
  <div class="paper rv">
   <label style="margin-top:0">姓名 <em>*</em></label><input type="text" id="n" placeholder="請填寫全名">
-  <label>是否會出席婚禮</label>
-  <div class="opts" data-k="att"><button>出席 ! 絕對到場 !</button><button>無法出席，心意不缺席 !</button></div>
+  <label>是否會出席婚禮 <em>*</em></label>
+  <div class="opts" data-k="att"><button type="button">出席 ! 絕對到場 !</button><button type="button">無法出席，心意不缺席 !</button></div>
   <label>出席人數 <em>*</em></label><input type="text" inputmode="numeric" id="c" placeholder="含自己，請填數字">
   <label>需要幾張兒童座椅(不佔位)</label><input type="text" inputmode="numeric" id="k" placeholder="不需要可留白">
   <label>飲食喜好 <em>*</em></label>
-  <div class="opts" data-k="diet"><button>葷，大口吃肉</button><button>素，大口吃菜</button></div>
+  <div class="opts" data-k="diet"><button type="button">葷，大口吃肉</button><button type="button">素，大口吃菜</button></div>
   <label>是否需要寄送喜帖 <em>*</em></label>
-  <div class="opts" data-k="card"><button>期待你們的電子喜帖</button><button>請寄給我紙本喜帖</button></div>
+  <div class="opts" data-k="card"><button type="button">期待你們的電子喜帖</button><button type="button">請寄給我紙本喜帖</button></div>
+  <label>喜帖寄送地址</label><input type="text" id="addr" placeholder="若需紙本喜帖請填寫收件地址">
   <label>終於到了這天，有甚麼想對我們說的祝福嗎</label><textarea id="m" placeholder="想對我們說的話"></textarea>
   <div class="err" id="err"></div>
-  <div style="text-align:center;margin-top:8px"><button class="btn" id="go">送出回覆</button></div>
- </div>
- <div id="res">
-  <p id="resmsg" style="font-size:.85rem"></p>
-  <pre id="txt"></pre>
-  <a class="btn" id="gopen" target="_blank" rel="noopener" style="background:#6f8260">開啟 Google 表單</a>
-  <a class="btn o" id="gfill" target="_blank" rel="noopener" style="display:none">備用：開啟已填好的表單</a>
-  <a class="btn line" id="lineSend" target="_blank" rel="noopener">用 LINE 傳送</a>
-  <button class="btn o" id="copy">複製內容</button>
-  <a class="btn o" id="addf" target="_blank" rel="noopener" style="display:none">先加新人 LINE 好友</a>
+  <div style="text-align:center;margin-top:16px"><button type="button" class="btn" id="go">送出回覆</button></div>
  </div>
  </div>
  </section>
 <footer class="sc">Amber &amp; Jack · 2027.03.13</footer>
 <script>
-<script>
-const GOOGLE_FORM_URL="https://docs.google.com/forms/d/e/1FAIpQLScAXw2H41NKQ4K-B8hcJdiWXqyckMMl0mjU5tETV6Y8CVTkYQ/viewform"; 
+const FORM_RESPONSE_URL="https://docs.google.com/forms/d/e/1FAIpQLScAXw2H41NKQ4K-B8hcJdiWXqyckMMl0mjU5tETV6Y8CVTkYQ/formResponse";
 
 document.querySelectorAll('[data-ph]').forEach(el=>el.addEventListener('click',()=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>{const f=i.files[0];if(!f)return;el.innerHTML='<img alt="">';el.firstChild.src=URL.createObjectURL(f)};i.click()}));
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('on');io.unobserve(x.target)}}),{threshold:.12});
@@ -166,15 +157,16 @@ let opened=false;
 function openInv(){if(opened)return;opened=true;document.getElementById('intro').classList.add('open');document.getElementById('mus').classList.add('show');startMusic();setInterval(petal,1100)}
 function petal(){const p=document.createElement('div');p.className='petal';p.style.left=Math.random()*100+'vw';p.style.setProperty('--dx',(Math.random()*120-60)+'px');p.style.animationDuration=(7+Math.random()*6)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),14000)}
 
-/* 1. 更新為正確的 Google 表單題庫 ID */
+/* Google 表單完整 8 個欄位的對應代碼 */
 const ENTRIES={
-    name:"entry.311798423",
-    att:"entry.958933812",
-    count:"entry.1628641506",
-    kids:"entry.1217762791", /* 兒童座椅的新 ID */
-    diet:"entry.839522",
-    card:"entry.1086763401",
-    msg:"entry.1550498129"
+  name:"entry.311798423",   // 姓名
+  att:"entry.958933812",    // 是否出席
+  count:"entry.1628641506", // 出席人數
+  kids:"entry.1883633959",  // 兒童座椅
+  diet:"entry.839522",      // 飲食喜好
+  card:"entry.1086763401",  // 是否需要寄送喜帖
+  addr:"entry.1217762791",  // 寄送地址
+  msg:"entry.1550498129"    // 祝福的話
 };
 
 const $=id=>document.getElementById(id);
@@ -183,54 +175,49 @@ document.querySelectorAll('.opts').forEach(g=>g.querySelectorAll('button').forEa
   const on=b.classList.contains('on');g.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
   if(on){V[g.dataset.k]=''}else{b.classList.add('on');V[g.dataset.k]=b.textContent}}));
 
-/* 2. 表單背景自動送出邏輯 */
 $('go').onclick=()=>{
-  const d={name:$('n').value.trim(),att:V.att||'',count:$('c').value.trim(),kids:$('k').value.trim(),diet:V.diet||'',card:V.card||'',msg:$('m').value.trim()};
-  
-  // 檢查必填欄位
+  const d={
+    name:$('n').value.trim(),
+    att:V.att||'',
+    count:$('c').value.trim(),
+    kids:$('k').value.trim()||'0',
+    diet:V.diet||'',
+    card:V.card||'',
+    addr:$('addr').value.trim(),
+    msg:$('m').value.trim()
+  };
   if(!d.name){$('err').textContent='請填寫姓名';return}
+  if(!d.att){$('err').textContent='請選擇是否會出席婚禮';return}
   if(!d.count){$('err').textContent='請填寫出席人數';return}
   if(!d.diet){$('err').textContent='請選擇飲食喜好';return}
   if(!d.card){$('err').textContent='請選擇是否需要寄送喜帖';return}
+  if(d.card.includes('紙本') && !d.addr){$('err').textContent='選擇紙本喜帖請填寫寄送地址';return}
   $('err').textContent='';
-  
-  // 避免重複點擊，按鈕改為傳送中
-  const btn = $('go');
-  btn.textContent = '傳送中...';
-  btn.style.opacity = '0.7';
-  btn.style.pointerEvents = 'none';
 
-  // 將填寫資料綁定到 Google 表單對應欄位
-  const q = new URLSearchParams();
+  // 建立隱藏的 POST 表單，直接送出並跳轉至 Google 表單「已完成填寫」畫面
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = FORM_RESPONSE_URL;
+
   Object.keys(ENTRIES).forEach(k => {
-    const v = k === 'kids' ? (d.kids || '0') : d[k];
-    if (v) q.set(ENTRIES[k], v);
+    if(d[k] !== '') {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = ENTRIES[k];
+      input.value = d[k];
+      form.appendChild(input);
+    }
   });
 
-  // 使用 fetch 發送 POST 請求直接將資料塞給 Google
-  fetch(GOOGLE_FORM_URL.replace('viewform', 'formResponse'), {
-    method: 'POST',
-    mode: 'no-cors', // 忽略跨域問題強制送出
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: q.toString()
-  }).then(() => {
-    // 送出成功後，將整個填寫區塊替換為感謝畫面
-    $('localForm').innerHTML = '<div style="text-align:center; padding: 40px 20px; animation: rv 1s forwards;"><h3 style="color:var(--acc); font-size:1.4rem; margin-bottom:12px;">回覆已成功送出！</h3><p style="color:var(--soft);">非常感謝您的回覆，<br>期待在婚禮當天與您相見！</p></div>';
-  }).catch((err) => {
-    $('err').textContent = '網路連線異常，請稍後再試。';
-    btn.textContent = '送出回覆';
-    btn.style.opacity = '1';
-    btn.style.pointerEvents = 'auto';
-  });
+  document.body.appendChild(form);
+  form.submit();
 };
 
-/* 音樂設定 */
-const au = new Audio('./music.mp3');
+/* 音樂：直接載入同資料夾的 music.mp3 */
+const au=new Audio('music.mp3');
 au.loop=true;au.volume=.8;au.preload='auto';let playing=false;
 function mark(on){playing=on;const m=document.getElementById('mus');m.classList.toggle('on',on);m.style.opacity=on?.92:.5}
 function startMusic(){const r=au.play();if(r&&r.then)r.then(()=>mark(true)).catch(()=>mark(false));else mark(true)}
 function toggleMusic(){if(playing){au.pause();mark(false)}else{startMusic()}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)au.pause();else if(!document.hidden&&playing)au.play().catch(()=>{})});
-</script>
+</script></body></html>
